@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>费用计算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            position: relative;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            border: none;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 15px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 25px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .result-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .result-content {
+            padding: 20px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            color: #666;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .total-amount {
+            font-size: 20px;
+            color: #4CAF50;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .calculate-btn {
+            flex: 2;
+            background-color: #4CAF50;
+        }
+        .reset-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .reset-btn:hover {
+            color: #333;
+            background: none;
+        }
+        .reset-btn i {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button onclick="resetForm()" class="reset-btn" title="重置表单">
+            <i class="fas fa-redo-alt"></i>
+        </button>
+        <h2>费用计算器</h2>
+        <div class="form-group">
+            <label for="price">产品销售价:</label>
+            <input type="number" id="price" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+            <label for="quantity">销售数量:</label>
+            <input type="number" id="quantity" min="1">
+        </div>
+        <div class="form-group">
+            <label for="boxes">箱数:</label>
+            <input type="number" id="boxes" min="0">
+        </div>
+        <div class="form-group">
+            <label for="serviceFee">代发费用（元/箱）:</label>
+            <input type="number" id="serviceFee" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+            <label for="shippingFee">物流费用:</label>
+            <input type="number" id="shippingFee" step="0.01" min="0">
+        </div>
+        <div class="button-group">
+            <button onclick="calculateFee()" class="calculate-btn">计算费用</button>
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function resetForm() {
+            document.getElementById('price').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('boxes').value = '';
+            document.getElementById('serviceFee').value = '';
+            document.getElementById('shippingFee').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function calculateFee() {
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const boxes = parseInt(document.getElementById('boxes').value) || 0;
+            const serviceFee = parseFloat(document.getElementById('serviceFee').value) || 0;
+            const shippingFee = parseFloat(document.getElementById('shippingFee').value) || 0;
+
+            if (price <= 0 || quantity <= 0) {
+                alert('请输入有效的销售价格和数量！');
+                return;
+            }
+
+            const productTotal = price * quantity;
+            const isDeliveryService = boxes > 0 && serviceFee > 0;
+            const serviceCharge = isDeliveryService ? boxes * serviceFee : 0;
+            const totalFee = isDeliveryService ? 
+                (productTotal + serviceCharge + shippingFee) : 
+                productTotal;
+
+            const resultElement = document.getElementById('result');
+            if (isDeliveryService) {
+                resultElement.innerHTML = `
+                    <div class="result-header">代发费用明细</div>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <span class="result-label">商品总额</span>
+                            <span class="result-value">${productTotal.toFixed(2)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">代发费用</span>
+                            <span class="result-value">${serviceCharge.toFixed(2)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">物流费用</span>
+                            <span class="result-value">${shippingFee.toFixed(2)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">代发总费用</span>
+                            <span class="result-value total-amount">${totalFee.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+            } else {
+                resultElement.innerHTML = `
+                    <div class="result-header">自提费用明细</div>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <span class="result-label">商品总额</span>
+                            <span class="result-value total-amount">${totalFee.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>
